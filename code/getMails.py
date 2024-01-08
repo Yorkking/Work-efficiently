@@ -11,9 +11,8 @@ import re
 class IMAP_Downemail(object):
     """
     imap邮箱下载附件(腾讯企业邮箱测试通过)
-    """
-
-    def __init__(self, account, pwd, serverurl, savedir, startdate, enddate, exts=['.xls', '.xlsx', '.jpg', '.png']):
+    """    
+    def __init__(self, account, pwd, serverurl, savedir, startdate, enddate, subject_regular_rule, file_regular_rule, exts=['.xls', '.xlsx', '.jpg', '.png', '.pptx']):
         """
         init
         :param account:   邮箱账户
@@ -31,6 +30,8 @@ class IMAP_Downemail(object):
         self._startdate = startdate
         self._enddate = enddate
         self._exts = exts
+        self._subject_regular_rule = subject_regular_rule
+        self._file_regular_rule = file_regular_rule
 
     def __getEmailattachment(self, msg):
         """
@@ -45,7 +46,7 @@ class IMAP_Downemail(object):
 
         # 过滤符合规则的主题
         _file_name = ''
-        if re.match(r'regular rule', subject) is None:
+        if re.match(self._subject_regular_rule, subject) is None:
             print("%s : subject is not legal!!" % (subject))
             return attachments
         _file_name = subject
@@ -70,7 +71,7 @@ class IMAP_Downemail(object):
                 continue
 
             # 筛选符合条件的文件
-            if re.match(r'regular rule', fileName) is None:
+            if re.match(self._file_regular_rule, fileName) is None:
                 print("%s : filename is not legal!!" % (fileName))
                 fileName = subject + extension
                 print("replaced filename: %s" % (fileName))
@@ -170,18 +171,22 @@ if __name__ == '__main__':
     # 邮箱账号列表
     account_list = [
         {
-            "email": "****",  # 邮箱
-            "password": "****",  # 授权密码
-            "server": "*****"  # 服务器地址
+            "email": "*****",  # 邮箱
+            "password": "*******",  # 授权密码
+            "server": "*********"  # 服务器地址
         }
     ]
 
     # 文件保存目录
-    _dir = r"./"
+    _dir = r"./intro"
 
     # 邮件开始日期和结束日期
-    startdate = "20221016"
-    enddate = "20221017"
+    startdate = "20240107"
+    enddate = "20240111"
+
+    # 过滤邮件主题和邮件附件规则
+    subject_regular_rule = r'regular rule'
+    file_regular_rule = r'regular rule'
 
     # 下载
     for account in account_list:
@@ -189,7 +194,7 @@ if __name__ == '__main__':
         _password = account['password']
         _server = account['server']
         etool = IMAP_Downemail(_email, _password, _server,
-                               _dir, startdate, enddate)
+                               _dir, startdate, enddate, subject_regular_rule, file_regular_rule)
         etool.scanDown(process_msg)
 
     print('Done.')
